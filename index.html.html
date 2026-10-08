@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Приветственный кейс</title>
+<style>
+:root{
+  --bg:#0f0d18; --bg2:#1a1530; --ink:#f3ecff; --muted:#9b8bc4; --line:#2f2547;
+  --gold:#f7c14b; --gold2:#e09b1e;
+  --r-consumer:#b0c3d9; --r-industrial:#5e98d9; --r-milspec:#4b69ff;
+  --r-restricted:#8847ff; --r-classified:#d32ce6; --r-covert:#eb4b4b; --r-gold:#e4ae39;
+  --card:#241c3d; --card2:#2e2450;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{
+  background:radial-gradient(80% 60% at 50% 0%, var(--bg2), var(--bg) 70%);
+  color:var(--ink);font-family:"Rajdhani","Trebuchet MS",system-ui,sans-serif;
+  min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;
+}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:16px clamp(12px,3vw,32px);gap:12px}
+.btn-ghost{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:var(--ink);font-weight:600;font-size:15px;transition:background .15s,transform .1s}
+.btn-ghost:hover{background:rgba(255,255,255,.1)}
+h1{font-size:clamp(20px,3.2vw,30px);margin:0;font-weight:800;letter-spacing:.5px;text-align:center;flex:1}
+.topbar .spacer{width:110px}
+main{max-width:1200px;margin:0 auto;padding:8px clamp(12px,3vw,32px) 40px;display:flex;flex-direction:column;align-items:center}
+
+.bg-particles{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.bg-particles .p{position:absolute;border-radius:50%;background:radial-gradient(circle, rgba(192,132,252,.9), rgba(192,132,252,0) 70%);animation:floatUp linear infinite;filter:blur(.3px)}
+@keyframes floatUp{0%{transform:translateY(0) translateX(0) scale(1);opacity:0}10%{opacity:.7}90%{opacity:.7}100%{transform:translateY(-110vh) translateX(var(--dx,0)) scale(.4);opacity:0}}
+
+.showcase{position:relative;width:100%;min-height:260px;display:flex;align-items:center;justify-content:center;gap:14px;padding:20px 0 10px;z-index:1}
+.side-strip{display:flex;gap:14px;flex:1 1 0;min-width:0;mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);transition:opacity .35s ease, transform .45s ease}
+.side-strip.left{justify-content:flex-end}
+.side-strip.right{justify-content:flex-start}
+.side-strip.hide{opacity:0;pointer-events:none}
+.side-strip.left.hide{transform:translateX(-40px)}
+.side-strip.right.hide{transform:translateX(40px)}
+
+.preview{flex:0 0 150px;height:210px;border-radius:14px;background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:10px;gap:8px;position:relative;overflow:hidden;box-shadow:inset 0 -60px 60px -30px rgba(139,92,246,.35)}
+.preview::before{content:"";position:absolute;inset:0;background:radial-gradient(60% 50% at 50% 30%, rgba(192,132,252,.25), transparent 70%);pointer-events:none}
+.preview .em{flex:1;display:flex;align-items:center;justify-content:center;width:100%}
+.preview .em svg,.preview .em img{width:130px;height:auto;max-height:130px;object-fit:contain;filter:drop-shadow(0 6px 10px rgba(0,0,0,.6))}
+.preview .nm{font-size:12px;font-weight:600;text-align:center;line-height:1.2;color:var(--ink);opacity:.9;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;min-height:30px}
+.preview .bar{position:absolute;left:0;right:0;bottom:0;height:3px}
+
+.r-consumer .bar{background:var(--r-consumer)}
+.r-industrial .bar{background:var(--r-industrial)}
+.r-milspec .bar{background:var(--r-milspec)}
+.r-restricted .bar{background:var(--r-restricted)}
+.r-classified .bar{background:var(--r-classified)}
+.r-covert .bar{background:var(--r-covert)}
+.r-gold .bar{background:var(--r-gold)}
+
+.case-center{flex:0 0 auto;position:relative;width:230px;height:200px;display:flex;align-items:center;justify-content:center;cursor:pointer;outline:none;transition:opacity .35s ease, transform .45s ease}
+.case-center.hide{opacity:0;transform:scale(.6);pointer-events:none}
+.case-center:focus-visible .case-glow{outline:3px solid var(--gold);outline-offset:6px;border-radius:24px}
+.case-glow{position:relative;width:190px;height:150px;filter:drop-shadow(0 0 26px rgba(168,85,247,.7)) drop-shadow(0 0 60px rgba(139,92,246,.45));animation:float 3.4s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-8px)}}
+.case-glow svg{width:100%;height:100%;display:block}
+.case-glow::after{content:"";position:absolute;inset:-6% -4%;background:radial-gradient(closest-side, rgba(192,132,252,.35), transparent 75%);z-index:-1;border-radius:50%}
+.case-center.spin .case-glow{animation:spin .9s cubic-bezier(.3,1.4,.5,1),float 3.4s ease-in-out infinite;animation-delay:0,.9s}
+@keyframes spin{to{transform:rotateY(720deg) scale(1.08)}}
+
+.coins{position:absolute;inset:0;pointer-events:none}
+.coin{position:absolute;width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 35% 30%, #ffe28a, #e9a324 60%, #a56a05);box-shadow:inset 0 0 0 2px #a56a05, 0 3px 6px rgba(0,0,0,.5);animation:coinFloat 2.6s ease-in-out infinite}
+.coin::after{content:"$";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:900;color:#8b5804;font-size:14px}
+.coin:nth-child(1){top:-4px;left:8px;animation-delay:0s}
+.coin:nth-child(2){top:18px;right:2px;animation-delay:.4s}
+.coin:nth-child(3){bottom:6px;left:-6px;animation-delay:.8s}
+.coin:nth-child(4){bottom:-4px;right:14px;animation-delay:1.2s}
+.coin:nth-child(5){top:-14px;right:38px;animation-delay:1.6s}
+@keyframes coinFloat{50%{transform:translateY(-6px) rotate(8deg)}}
+
+.reel-wrap{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.85);width:min(96%, 1000px);height:200px;opacity:0;pointer-events:none;overflow:hidden;border-radius:18px;background:linear-gradient(180deg, rgba(139,92,246,.10), rgba(20,15,35,.6));border:1px solid var(--line);transition:opacity .35s ease, transform .45s cubic-bezier(.3,1.4,.5,1), box-shadow .4s;z-index:5}
+.reel-wrap.on{opacity:1;transform:translate(-50%,-50%) scale(1);pointer-events:auto;box-shadow:0 0 40px rgba(139,92,246,.35), inset 0 0 40px rgba(139,92,246,.15)}
+.reel-wrap.spinning{box-shadow:0 0 60px rgba(247,193,75,.5),0 0 120px rgba(139,92,246,.4),inset 0 0 60px rgba(247,193,75,.2)}
+.reel-wrap::before,.reel-wrap::after{content:"";position:absolute;top:0;bottom:0;width:18%;z-index:3;pointer-events:none}
+.reel-wrap::before{left:0;background:linear-gradient(90deg,var(--bg),transparent)}
+.reel-wrap::after{right:0;background:linear-gradient(-90deg,var(--bg),transparent)}
+
+.reel-wrap .aura{position:absolute;inset:-2px;border-radius:20px;pointer-events:none;z-index:2;background:linear-gradient(90deg,transparent 0%,rgba(247,193,75,.15) 40%,rgba(247,193,75,.35) 50%,rgba(247,193,75,.15) 60%,transparent 100%);opacity:0;transition:opacity .3s}
+.reel-wrap.spinning .aura{opacity:1;animation:auraPulse 1.2s ease-in-out infinite}
+@keyframes auraPulse{50%{opacity:.5}}
+
+.pointer{position:absolute;left:50%;top:0;bottom:0;width:3px;margin-left:-1.5px;background:linear-gradient(180deg,var(--gold),var(--gold2));box-shadow:0 0 22px var(--gold),0 0 6px var(--gold);z-index:4}
+.pointer::before,.pointer::after{content:"";position:absolute;left:50%;transform:translateX(-50%);border:10px solid transparent}
+.pointer::before{top:-2px;border-top-color:var(--gold)}
+.pointer::after{bottom:-2px;border-bottom-color:var(--gold)}
+
+.strip{display:flex;gap:12px;padding:18px 0;will-change:transform;transform:translate3d(0,0,0);position:relative;z-index:1}
+.card{flex:0 0 150px;height:164px;border-radius:14px;background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:8px;position:relative;overflow:hidden;transition:filter .25s ease, transform .25s ease}
+.card .em{flex:1;display:flex;align-items:center;justify-content:center;width:100%}
+.card .em svg,.card .em img{width:130px;height:auto;max-height:110px;object-fit:contain;filter:drop-shadow(0 4px 6px rgba(0,0,0,.5))}
+.card .nm{font-size:12px;font-weight:600;line-height:1.2;padding-bottom:6px}
+.card .bar{position:absolute;left:0;right:0;bottom:0;height:4px}
+
+.card.r-consumer{--glow:#b0c3d9}
+.card.r-industrial{--glow:#5e98d9}
+.card.r-milspec{--glow:#4b69ff}
+.card.r-restricted{--glow:#8847ff}
+.card.r-classified{--glow:#d32ce6}
+.card.r-covert{--glow:#eb4b4b}
+.card.r-gold{--glow:#e4ae39}
+.card.under-pointer{filter:brightness(1.35) drop-shadow(0 0 14px var(--glow,rgba(247,193,75,.9)));transform:scale(1.06);z-index:2}
+.card.winner-card{filter:brightness(1.6) drop-shadow(0 0 26px var(--glow,rgba(247,193,75,1)));transform:scale(1.12);box-shadow:0 0 30px var(--glow,rgba(247,193,75,.8)),inset 0 0 20px rgba(255,255,255,.08)}
+
+.actions{display:flex;align-items:center;gap:18px;margin-top:14px;flex-wrap:wrap;justify-content:center;transition:opacity .3s ease;z-index:1;position:relative}
+.actions.hide{opacity:0;pointer-events:none}
+.btn-open{position:relative;padding:15px 34px;border-radius:14px;font-weight:800;font-size:17px;letter-spacing:.4px;color:#3a2200;background:linear-gradient(180deg,#ffd66b,var(--gold) 45%,var(--gold2));box-shadow:0 6px 0 #a16f0a, 0 12px 24px rgba(247,193,75,.35);transition:transform .08s ease, box-shadow .15s}
+.btn-open:hover{filter:brightness(1.05)}
+.btn-open:active{transform:translateY(3px);box-shadow:0 3px 0 #a16f0a, 0 6px 14px rgba(247,193,75,.3)}
+.btn-open::after{content:"";position:absolute;inset:2px 2px 50% 2px;border-radius:12px 12px 4px 4px;background:linear-gradient(180deg,rgba(255,255,255,.5),transparent);pointer-events:none}
+.btn-open[disabled]{opacity:.55;cursor:not-allowed;transform:none}
+
+.switch{display:inline-flex;align-items:center;gap:10px;padding:9px 14px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);font-weight:600;font-size:14px;color:var(--muted)}
+.switch.on{color:var(--ink)}
+.switch .track{width:38px;height:22px;border-radius:999px;background:#3a2f5c;position:relative;transition:background .2s}
+.switch.on .track{background:var(--gold)}
+.switch .thumb{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .2s}
+.switch.on .thumb{transform:translateX(16px)}
+
+.result{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;background:radial-gradient(60% 60% at 50% 40%, rgba(20,10,40,.75), rgba(5,3,12,.92));backdrop-filter:blur(6px);padding:20px}
+.result.on{display:flex;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0}}
+.result-card{position:relative;width:min(420px,92vw);border-radius:22px;background:linear-gradient(180deg,#2a1e4c,#1a1330);border:1px solid var(--line);padding:26px 22px 22px;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.04) inset;animation:pop .5s cubic-bezier(.2,1.5,.4,1);overflow:hidden}
+@keyframes pop{from{opacity:0;transform:scale(.85) translateY(20px)}}
+.result-card::before{content:"";position:absolute;inset:-40% -40% auto -40%;height:70%;background:radial-gradient(closest-side, var(--glow,rgba(139,92,246,.6)), transparent 70%);opacity:.55;pointer-events:none}
+.result-em{position:relative;padding:8px 0 4px}
+.result-em svg,.result-em img{width:min(280px,74vw);max-height:220px;object-fit:contain;height:auto;filter:drop-shadow(0 8px 18px rgba(0,0,0,.6)) drop-shadow(0 0 30px var(--glow,rgba(139,92,246,.7)))}
+.result-card h2{margin:6px 0 2px;font-size:22px;position:relative}
+.result-card .rar{font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;position:relative;color:var(--glow,var(--r-classified))}
+.result-actions{display:flex;gap:10px;justify-content:center;margin-top:18px;position:relative;flex-wrap:wrap}
+.btn-again{padding:12px 22px;border-radius:12px;font-weight:700;color:#3a2200;background:linear-gradient(180deg,#ffd66b,var(--gold) 45%,var(--gold2));box-shadow:0 4px 0 #a16f0a}
+.btn-again:active{transform:translateY(2px);box-shadow:0 2px 0 #a16f0a}
+.btn-close{padding:12px 22px;border-radius:12px;font-weight:700;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)}
+.btn-close:hover{background:rgba(255,255,255,.1)}
+
+.res-consumer{--glow:#b0c3d9}
+.res-industrial{--glow:#5e98d9}
+.res-milspec{--glow:#4b69ff}
+.res-restricted{--glow:#8847ff}
+.res-classified{--glow:#d32ce6}
+.res-covert{--glow:#eb4b4b}
+.res-gold{--glow:#e4ae39}
+
+.conf{position:fixed;top:-24px;width:8px;height:14px;z-index:60;pointer-events:none;border-radius:2px;animation:fall linear forwards}
+@keyframes fall{to{transform:translate(var(--dx),115vh) rotate(var(--rot));opacity:.9}}
+
+@media (max-width:720px){
+  .side-strip{display:none}
+  .case-center{width:200px;height:180px}
+  .case-glow{width:170px;height:135px}
+  .btn-open{padding:14px 26px;font-size:16px}
+  h1{font-size:20px}
+  .reel-wrap{height:180px}
+  .card{flex:0 0 130px;height:146px}
+  .card .em svg,.card .em img{width:112px}
+}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;transition-duration:.01s!important}}
+</style>
+</head>
+<body>
+
+<div class="bg-particles" id="bgParticles"></div>
+
+<svg width="0" height="0" style="position:absolute"><defs>
+  <linearGradient id="shine" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#fff" stop-opacity=".85"/>
+    <stop offset=".5" stop-color="#fff" stop-opacity="0"/>
+    <stop offset="1" stop-color="#000" stop-opacity=".55"/>
+  </linearGradient>
+</defs></svg>
+
+<div class="topbar">
+  <button class="btn-ghost" onclick="location.reload()">← Главная</button>
+  <h1>Я люблю тебя</h1>
+  <span class="spacer"></span>
+</div>
+
+<main>
+  <div class="showcase" id="showcase">
+    <div class="side-strip left" id="stripL"></div>
+
+    <div class="case-center" id="caseBtn" role="button" tabindex="0" aria-label="Открыть кейс">
+      <div class="coins">
+        <span class="coin"></span><span class="coin"></span><span class="coin"></span>
+        <span class="coin"></span><span class="coin"></span>
+      </div>
+      <div class="case-glow">
+        <svg viewBox="0 0 200 170" aria-hidden="true">
+  <defs>
+    <!-- === ОСНОВНЫЕ МЕТАЛЛИЧЕСКИЕ ГРАДИЕНТЫ === -->
+    <linearGradient id="metalBody" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e8ecf0"/>
+      <stop offset=".08" stop-color="#c8d0dc"/>
+      <stop offset=".3" stop-color="#9aa2b0"/>
+      <stop offset=".55" stop-color="#6a7280"/>
+      <stop offset=".85" stop-color="#3a3e48"/>
+      <stop offset="1" stop-color="#1a1e28"/>
+    </linearGradient>
+    <linearGradient id="metalTop" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f8fbfe"/>
+      <stop offset=".2" stop-color="#d0d8e4"/>
+      <stop offset=".5" stop-color="#8a92a0"/>
+      <stop offset=".85" stop-color="#4a5260"/>
+      <stop offset="1" stop-color="#2a2e38"/>
+    </linearGradient>
+    <linearGradient id="metalLeft" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#1a1e28"/>
+      <stop offset=".5" stop-color="#4a5260"/>
+      <stop offset="1" stop-color="#8a92a0"/>
+    </linearGradient>
+    <linearGradient id="metalRight" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#8a92a0"/>
+      <stop offset=".5" stop-color="#4a5260"/>
+      <stop offset="1" stop-color="#1a1e28"/>
+    </linearGradient>
+    <linearGradient id="metalRibbon" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff5c8"/>
+      <stop offset=".3" stop-color="#f7c14b"/>
+      <stop offset=".7" stop-color="#c98a12"/>
+      <stop offset="1" stop-color="#7a5410"/>
+    </linearGradient>
+    <linearGradient id="metalRibbonV" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#7a5410"/>
+      <stop offset=".3" stop-color="#f7c14b"/>
+      <stop offset=".5" stop-color="#fff5c8"/>
+      <stop offset=".7" stop-color="#f7c14b"/>
+      <stop offset="1" stop-color="#7a5410"/>
+    </linearGradient>
+    <radialGradient id="boltHead" cx=".35" cy=".3" r=".8">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset=".3" stop-color="#c8d0dc"/>
+      <stop offset=".7" stop-color="#6a7280"/>
+      <stop offset="1" stop-color="#1a1e28"/>
+    </radialGradient>
+    <radialGradient id="glowCore" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="#c084fc" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#c084fc" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- === ФИЛЬТР ШУМА МЕТАЛЛА === -->
+    <filter id="brushedMetal" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.02 0.9" numOctaves="3" seed="12"/>
+      <feColorMatrix values="0 0 0 0 0.6  0 0 0 0 0.65  0 0 0 0 0.7  0 0 0 0.18 0"/>
+      <feComposite in2="SourceGraphic" operator="in"/>
+    </filter>
+
+    <!-- === ФИЛЬТР ЦАРАПИН === -->
+    <filter id="scratches" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8 0.05" numOctaves="2" seed="4"/>
+      <feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.08 0"/>
+      <feComposite in2="SourceGraphic" operator="in"/>
+    </filter>
+
+    <!-- === ТЕНЬ ВНУТРИ (ambient occlusion) === -->
+    <filter id="ao">
+      <feGaussianBlur stdDeviation="2"/>
+    </filter>
+  </defs>
+
+  <!-- === СВЕЧЕНИЕ ПОД КЕЙСОМ === -->
+  <ellipse cx="100" cy="92" rx="90" ry="55" fill="url(#glowCore)"/>
+
+  <!-- === ТЕНЬ НА ЗЕМЛЕ === -->
+  <ellipse cx="100" cy="163" rx="76" ry="6" fill="rgba(0,0,0,.6)" filter="url(#ao)"/>
+
+  <!-- === ОСНОВАНИЕ (нижняя часть) === -->
+  <!-- левая тёмная грань для объёма -->
+  <rect x="24" y="72" width="4" height="76" fill="url(#metalLeft)"/>
+  <!-- правая тёмная грань -->
+  <rect x="172" y="72" width="4" height="76" fill="url(#metalRight)"/>
+  <!-- сама передняя панель -->
+  <rect x="27" y="72" width="146" height="76" rx="4" fill="url(#metalBody)" stroke="#0a0c10" stroke-width="1.8"/>
+  <!-- верхняя световая кромка -->
+  <rect x="27" y="72" width="146" height="2" fill="#f0f4f8" opacity=".7"/>
+  <!-- нижняя тёмная кромка -->
+  <rect x="27" y="146" width="146" height="2" fill="#0a0c10" opacity=".8"/>
+
+  <!-- === ДЕКОРАТИВНАЯ ПОЛОСА С ВЕНТИЛЯЦИЕЙ === -->
+  <rect x="27" y="96" width="146" height="14" fill="#0e1118" opacity=".55"/>
+  <rect x="27" y="96" width="146" height="1.2" fill="#f0f4f8" opacity=".5"/>
+  <rect x="27" y="108.8" width="146" height="1.2" fill="#0a0c10" opacity=".9"/>
+  <!-- вентиляционные прорези -->
+  <g opacity=".85">
+    <rect x="36" y="99" width="10" height="8" rx="1" fill="#0a0c10"/>
+    <rect x="50" y="99" width="10" height="8" rx="1" fill="#0a0c10"/>
+    <rect x="64" y="99" width="10" height="8" rx="1" fill="#0a0c10"/>
+    <rect x="126" y="99" width="10" height="8" rx="1" fill="#0a0c10"/>
+    <rect x="140" y="99" width="10" height="8" rx="1" fill="#0a0c10"/>
+    <rect x="154" y="99" width="10" height="8" rx="1" fill="#0a0c10"/>
+  </g>
+
+  <!-- === ЗАКЛЁПКИ === -->
+  <g>
+    <!-- верхние -->
+    <circle cx="36" cy="80" r="3" fill="url(#boltHead)" stroke="#0a0c10" stroke-width=".7"/>
+    <circle cx="36" cy="80" r="1.2" fill="#0a0c10" opacity=".5"/>
+    <circle cx="164" cy="80" r="3" fill="url(#boltHead)" stroke="#0a0c10" stroke-width=".7"/>
+    <circle cx="164" cy="80" r="1.2" fill="#0a0c10" opacity=".5"/>
+    <!-- нижние -->
+    <circle cx="36" cy="140" r="3" fill="url(#boltHead)" stroke="#0a0c10" stroke-width=".7"/>
+    <circle cx="36" cy="140" r="1.2" fill="#0a0c10" opacity=".5"/>
+    <circle cx="164" cy="140" r="3" fill="url(#boltHead)" stroke="#0a0c10" stroke-width=".7"/>
+    <circle cx="164" cy="140" r="1.2" fill="#0a0c10" opacity=".5"/>
+  </g>
+
+  <!-- === КРЫШКА === -->
+  <!-- тёмная кромка снизу -->
+  <path d="M20 70 Q20 24 100 22 Q180 24 180 70 L180 72 Q100 66 20 72 Z" fill="#0e1118"/>
+  <!-- основная форма -->
+  <path d="M22 70 Q22 26 100 24 Q178 26 178 70 Z" fill="url(#metalTop)" stroke="#0a0c10" stroke-width="1.8"/>
+
+  <!-- блик по крышке (главный источник света — сверху) -->
+  <path d="M36 62 Q54 34 100 31 Q130 32 152 46" stroke="#ffffff" stroke-width="2.6" fill="none" stroke-linecap="round" opacity=".85" filter="url(#ao)"/>
+  <path d="M44 58 Q60 40 94 36" stroke="#ffffff" stroke-width="1.4" fill="none" stroke-linecap="round" opacity=".6"/>
+
+  <!-- тень у основания крышки -->
+  <path d="M22 70 Q22 64 32 60 Q100 52 168 60 Q178 64 178 70 Q100 74 22 70 Z" fill="#0a0c10" opacity=".65"/>
+
+  <!-- горизонтальный шов посередине крышки -->
+  <path d="M28 48 Q100 42 172 48" stroke="#0a0c10" stroke-width="1" fill="none" opacity=".5"/>
+  <path d="M28 49 Q100 43 172 49" stroke="#f0f4f8" stroke-width=".8" fill="none" opacity=".4"/>
+
+  <!-- === ВЕРТИКАЛЬНАЯ ЛЕНТА === -->
+  <rect x="91" y="22" width="18" height="126" fill="url(#metalRibbonV)" stroke="#5a3c05" stroke-width="1"/>
+  <rect x="91" y="22" width="2" height="126" fill="#fff5c8" opacity=".55"/>
+  <rect x="107" y="22" width="2" height="126" fill="#7a5410" opacity=".6"/>
+  <!-- лёгкий блеск по ленте -->
+  <rect x="94" y="24" width="3" height="124" fill="#ffffff" opacity=".25"/>
+
+  <!-- === ГОРИЗОНТАЛЬНАЯ ЛЕНТА === -->
+  <rect x="27" y="96" width="146" height="14" fill="url(#metalRibbon)" stroke="#5a3c05" stroke-width="1"/>
+  <rect x="27" y="96" width="146" height="2.5" fill="#fff5c8" opacity=".6"/>
+  <rect x="27" y="107.5" width="146" height="2.5" fill="#7a5410" opacity=".65"/>
+
+  <!-- === БАНТ === -->
+  <!-- левое ухо -->
+  <path d="M100 34 C76 8 44 14 56 36 C66 52 90 44 100 34 Z" fill="url(#metalRibbon)" stroke="#5a3c05" stroke-width="1.4"/>
+  <!-- правое ухо -->
+  <path d="M100 34 C124 8 156 14 144 36 C134 52 110 44 100 34 Z" fill="url(#metalRibbon)" stroke="#5a3c05" stroke-width="1.4"/>
+  <!-- складки на банте -->
+  <path d="M66 26 Q82 20 96 30" stroke="#fff5c8" stroke-width="1.2" fill="none" opacity=".75"/>
+  <path d="M134 26 Q118 20 104 30" stroke="#fff5c8" stroke-width="1.2" fill="none" opacity=".75"/>
+  <path d="M60 34 Q74 30 88 36" stroke="#7a5410" stroke-width="1" fill="none" opacity=".6"/>
+  <path d="M140 34 Q126 30 112 36" stroke="#7a5410" stroke-width="1" fill="none" opacity=".6"/>
+  <!-- центральный узел -->
+  <circle cx="100" cy="34" r="9" fill="url(#boltHead)" stroke="#5a3c05" stroke-width="1.4"/>
+  <circle cx="100" cy="34" r="3.5" fill="#5a3c05"/>
+  <circle cx="98.5" cy="32.5" r="1.2" fill="#fff5c8" opacity=".8"/>
+
+  <!-- === ЗАМОК === -->
+  <rect x="86" y="110" width="28" height="22" rx="3" fill="url(#metalRibbon)" stroke="#5a3c05" stroke-width="1.8"/>
+  <!-- блик сверху замка -->
+  <rect x="86" y="110" width="28" height="3" fill="#fff5c8" opacity=".7"/>
+  <!-- тень снизу -->
+  <rect x="86" y="129" width="28" height="3" fill="#5a3c05" opacity=".7"/>
+  <!-- замочная скважина -->
+  <circle cx="100" cy="118" r="3.2" fill="#3a2200"/>
+  <rect x="98.5" y="118" width="3" height="9" fill="#3a2200"/>
+  <circle cx="100" cy="118" r="1.2" fill="#000000" opacity=".5"/>
+
+  <!-- === ШУМ МЕТАЛЛА ПОВЕРХ ВСЕГО === -->
+  <rect x="22" y="22" width="156" height="126" fill="#808890" filter="url(#brushedMetal)" opacity=".4" style="mix-blend-mode:overlay" pointer-events="none"/>
+
+  <!-- === ЦАРАПИНЫ === -->
+  <rect x="22" y="22" width="156" height="126" fill="#ffffff" filter="url(#scratches)" opacity=".35" style="mix-blend-mode:screen" pointer-events="none"/>
+</svg>
+        </svg>
+      </div>
+    </div>
+
+    <div class="side-strip right" id="stripR"></div>
+
+    <div class="reel-wrap" id="reelWrap" aria-hidden="true">
+      <div class="aura"></div>
+      <div class="pointer"></div>
+      <div class="strip" id="strip"></div>
+    </div>
+  </div>
+
+  <div class="actions" id="actions">
+    <button class="btn-open" id="openBtn">Открыть бесплатно</button>
+    <button class="switch" id="fastBtn" aria-pressed="false" title="Быстрая анимация">
+      Быстро <span class="track"><span class="thumb"></span></span>
+    </button>
+  </div>
+</main>
+
+<div class="result" id="result" role="dialog" aria-modal="true" aria-live="polite">
+  <div class="result-card" id="resultCard">
+    <div class="result-em" id="rEm"></div>
+    <h2 id="rName"></h2>
+    <div class="rar" id="rRar"></div>
+    <div class="result-actions">
+      <button class="btn-again" id="again">Открыть ещё раз</button>
+      <button class="btn-close" id="close">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================= НАСТРОЙКИ ================= */
+const REEL_LEN  = 60;
+const WIN_INDEX = 48;
+const CARD_W    = 150;
+const CARD_GAP  = 12;
+
+/* ============ РЕАЛЬНЫЕ КАРТИНКИ СКИНОВ (Steam CDN) ============ */
+const IMG = {
+  ak_asiimov:  "https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLwlcK3wiFO0POlPPNSIeOaB2qf19F6ueZhW2e2wEt-t2jcytf6dymSO1JxA5oiRecLsRa5kIfkYr-241aLgotHz3-rkGoXuUp8oX57",
+  p90_trigon:  "https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLhx8bf_jdk_6v-V7B_KfecAFicyOl-pK9vGi3nlEt24GnSwoypc3rFbQ52XsN0EOFcshfuwYa1NbzktVTZ3ohN02yg2RSFidN_",
+  m4a1_tornado:"https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL8ypexwjFU0OaheqpsJP-sBmKR1_c45eQ4Tnjllkwk42jQyY2hJS-XbwchD5B3EbIM4BG_ktC2Y-m04VSK35UFk3uQKKQL_w",
+  mac10_knots: "https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL8n5WxrR1a4s2lZqt5M8-RHGiHz9F6ueZhW2eywBwhsWmAz9-peSjFalQmCJFyTeEC4UO5kNTjNOy0sgXa3oxNzC36kGoXufH8E8DI",
+  mp9_hide:    "https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL8js_f_CNk5_uqbelgMKmsA2KUyPt7_uQ6Tny2zUp35juHzNaodi-RZw8mCJVzTe9ZshW9ktziP7m05lONgotbjXKpD1WBnwg",
+  p90_glacier: "https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLhx8bf7jJk4ve9YJtqLPGQB2KC_uJ_t-l9AX3ikERzsGiDmYuucijGbVNzXpMhELEOsEG9ldDnM-7n5QfW2dkUmHngznQeLgH7yAw",
+  sg553_cyber: "https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLimcO1qx1Y-s29b_E4c8-QF2WV0-h5ouJscCG2lAs-_W6GmNurcXKVbwcmCMR1RrFbsEGwxIDjZOLisVfX3t8Tnn_6hi1K6yd1o7FVUl4iPqM",
+  ssg08_anubis:"https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLijZGwpR1c_M29e6M9eM-SAHKSyP1JuORoWTD9wEl16znUy42hI3yRbQ8kApt5QeYNsBC5m4fnZr_j4Aze3d5EmS2ohzQJsHiy1ZObBQ",
+  karambit:    "https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyL6kJ_m-B1Q7uCvZaZkNM-SA1iUzv5mvOR7cDm7lA4i4AKJk4jxNWWebgAlA8dwQLMOshmwm9y0Puni5Qba3ohEni-r33xA7X5o4uZTV6ch5OSJ2C8W7sST",
+  ak_autoexec: "https://community.akamai.steamstatic.com/economy/image/i0CoZ81Ui0m-9KwlBY1L_18myuGuq1wfhWSaZgMttyVfPaERSR0Wqmu7LAocGIGz3UqlXOLrxM-vMGmW8VNxu5Dx60noTyLwlcK3wiNQu6WRabF5L_WLC2Svwu97v95lRi67gVN16mzSwtigdn2QPAElXpskQOQIthC8xIXiM-7k4gHfgoMWySyo2y4b8G81tI8PUinm"
+};
+
+/* ============ СПИСОК ПРЕДМЕТОВ ============ */
+const ITEMS = [
+  {name:"P90 | Trigon",           type:"p90",     a:"#55655c", b:"#e4572e", rarity:"milspec",    label:"Армейское",     weight:16, img:IMG.p90_trigon},
+  {name:"MAC-10 | Knots",         type:"tec9",    a:"#8a6a4a", b:"#5a3f2a", rarity:"industrial", label:"Промышленное",  weight:15, img:IMG.mac10_knots},
+  {name:"MP9 | Hide",             type:"p90",     a:"#6a7a5a", b:"#3a452a", rarity:"industrial", label:"Промышленное",  weight:14, img:IMG.mp9_hide},
+  {name:"P90 | Glacier Mesh",     type:"p90",     a:"#8ab4c9", b:"#d8e8f0", rarity:"milspec",    label:"Армейское",     weight:12, img:IMG.p90_glacier},
+  {name:"M4A1-S | Tornado",       type:"m4",      a:"#6a7a8a", b:"#2a3038", rarity:"restricted", label:"Запрещённое",   weight:10, img:IMG.m4a1_tornado},
+  {name:"SG 553 | Cyberforce",    type:"aug",     a:"#5a3a8a", b:"#2fd0e0", rarity:"restricted", label:"Запрещённое",   weight:9,  img:IMG.sg553_cyber},
+  {name:"SSG 08 | Anubis",        type:"sniper",  a:"#c9a84a", b:"#2a1a4a", rarity:"classified", label:"Засекреченное", weight:6,  img:IMG.ssg08_anubis},
+  {name:"AK-47 | Autoexec Camo",  type:"ak",      a:"#5a6a3a", b:"#2a3018", rarity:"classified", label:"Засекреченное", weight:5,  img:IMG.ak_autoexec},
+  {name:"AK-47 | Asiimov",        type:"ak",      a:"#c4262e", b:"#1a1d24", rarity:"covert",     label:"Тайное",        weight:3,  img:IMG.ak_asiimov},
+  {name:"Керамбит | Doppler P3",  type:"knife",   a:"#cfd6e2", b:"#8847ff", rarity:"gold",       label:"Редкий предмет",weight:1,  img:IMG.karambit}
+];
+
+/* ============ SVG-FALLBACK ============ */
+const D="#222733",M="#8b93a3",H="#12151c";
+const SHAPES={
+ ak:`<path d="M4 34 L40 31 L52 35 L52 54 L10 62Z" fill="var(--b)"/><rect x="50" y="29" width="62" height="21" rx="3" fill="var(--a)"/><path d="M52 29h60v4H52z" fill="${D}"/><path d="M110 33L158 35V47L110 49Z" fill="var(--b)"/><rect x="112" y="28" width="48" height="4" fill="${M}"/><rect x="158" y="38" width="30" height="4" fill="${M}"/><rect x="186" y="36" width="9" height="8" fill="${D}"/><path d="M176 29h4v9h-4z" fill="${D}"/><path d="M76 50H97Q99 70 90 84L72 80Q82 66 76 50Z" fill="${D}"/><path d="M54 50h12l-4 18H52z" fill="${D}"/>`,
+ m4:`<path d="M4 36L38 33L50 37V50L4 52Z" fill="${D}"/><rect x="48" y="30" width="66" height="20" rx="3" fill="var(--a)"/><rect x="52" y="23" width="56" height="7" rx="2" fill="${M}"/><rect x="112" y="33" width="50" height="14" rx="2" fill="var(--b)"/><rect x="160" y="38" width="28" height="4" fill="${M}"/><rect x="186" y="35" width="10" height="10" fill="${D}"/><path d="M72 50h18l-2 26H70z" fill="${D}"/><path d="M54 50h10l-3 16h-9z" fill="${D}"/><path d="M56 40H110" stroke="var(--b)" stroke-width="3"/>`,
+ aug:`<rect x="2" y="34" width="14" height="24" rx="4" fill="${D}"/><path d="M12 36L122 30L124 50L12 56Z" fill="var(--a)"/><rect x="38" y="17" width="48" height="11" rx="5" fill="${D}"/><circle cx="40" cy="22" r="7" fill="${M}"/><circle cx="86" cy="22" r="6" fill="${M}"/><rect x="122" y="37" width="70" height="6" fill="${M}"/><rect x="190" y="35" width="7" height="10" fill="${D}"/><path d="M128 44h10l-2 18h-8z" fill="${D}"/><path d="M76 52h18l-1 24H76z" fill="var(--b)"/><path d="M98 52h10l-2 18h-9z" fill="${D}"/><path d="M20 44H118" stroke="var(--b)" stroke-width="3"/>`,
+ p90:`<path d="M8 42Q8 30 24 28H140Q162 28 162 42Q162 56 140 58L40 60Q8 60 8 42Z" fill="var(--a)"/><rect x="40" y="19" width="92" height="10" rx="5" fill="var(--b)"/><path d="M68 44h30v16H68z" fill="${H}"/><rect x="160" y="38" width="28" height="5" fill="${M}"/><rect x="186" y="36" width="9" height="9" fill="${D}"/><path d="M72 58h24l-3 14H75z" fill="${D}"/><path d="M20 40H150" stroke="var(--b)" stroke-width="3"/>`,
+ tec9:`<rect x="56" y="26" width="90" height="18" rx="2" fill="var(--a)"/><rect x="60" y="20" width="58" height="6" fill="${M}"/><rect x="144" y="28" width="46" height="10" rx="5" fill="${D}"/><circle cx="156" cy="33" r="2" fill="${M}"/><circle cx="168" cy="33" r="2" fill="${M}"/><circle cx="180" cy="33" r="2" fill="${M}"/><path d="M64 44h18l-4 26H60z" fill="${D}"/><path d="M98 44h20v36H98z" fill="var(--b)"/><path d="M62 35H140" stroke="var(--b)" stroke-width="3"/>`,
+ sniper:`<path d="M2 36L40 30L56 34V56L8 62Z" fill="${D}"/><rect x="54" y="30" width="62" height="20" rx="3" fill="var(--a)"/><rect x="114" y="36" width="64" height="8" fill="var(--b)"/><rect x="176" y="37" width="20" height="6" fill="${M}"/><rect x="62" y="14" width="52" height="13" rx="6" fill="${D}"/><circle cx="64" cy="20" r="9" fill="${M}"/><circle cx="114" cy="20" r="7" fill="${M}"/><path d="M76 50h18l-4 24H72z" fill="${D}"/>`,
+ knife:`<path d="M52 14C150 6 178 52 128 80C148 52 112 30 60 38Z" fill="var(--a)"/><path d="M60 30C110 26 140 40 150 56" stroke="var(--b)" stroke-width="3" fill="none"/><rect x="40" y="26" width="26" height="22" rx="5" fill="${D}"/><circle cx="30" cy="38" r="12" fill="none" stroke="${M}" stroke-width="5"/>`,
+ pistol:`<path d="M56 24H146L152 30V42H56Z" fill="var(--a)"/><path d="M56 42L116 42V48L96 48L84 80H62L58 52Z" fill="${D}"/><rect x="146" y="33" width="9" height="7" fill="${M}"/><path d="M62 33H140" stroke="var(--b)" stroke-width="3"/>`
+};
+
+function svgArt(i){
+  const flip = i.type==="knife" ? "" : ' transform="translate(200 0) scale(-1 1)"';
+  return `<svg viewBox="0 0 200 86" style="--a:${i.a};--b:${i.b}" role="img" aria-label="${i.name}"><g${flip} stroke="#0c0e13" stroke-width="1.1" stroke-linejoin="round">${SHAPES[i.type]||SHAPES.pistol}</g><rect width="200" height="86" fill="url(#shine)" style="mix-blend-mode:soft-light"/></svg>`;
+}
+
+function art(i){
+  if(i.img){
+    const fb = svgArt(i).replace(/'/g,"&#39;").replace(/"/g,"&quot;");
+    return `<img src="${i.img}" alt="${i.name}" loading="lazy" decoding="async" onerror="this.outerHTML='${fb}'">`;
+  }
+  return svgArt(i);
+}
+
+/* ============ ЧАСТИЦЫ НА ФОНЕ ============ */
+function initParticles(){
+  const box = document.getElementById("bgParticles");
+  for(let i=0;i<28;i++){
+    const p = document.createElement("span");
+    p.className = "p";
+    const size = 2 + Math.random()*4;
+    p.style.width = size + "px";
+    p.style.height = size + "px";
+    p.style.left = Math.random()*100 + "vw";
+    p.style.bottom = "-10vh";
+    p.style.setProperty("--dx", (Math.random()*120-60)+"px");
+    p.style.animationDuration = (12 + Math.random()*14) + "s";
+    p.style.animationDelay = (-Math.random()*20) + "s";
+    p.style.opacity = 0.3 + Math.random()*0.5;
+    box.appendChild(p);
+  }
+}
+
+/* ============ ЛОГИКА ============ */
+const $=id=>document.getElementById(id);
+const caseBtn=$("caseBtn"), reelWrap=$("reelWrap"), strip=$("strip"), result=$("result"),
+      openBtn=$("openBtn"), actions=$("actions"), stripL=$("stripL"), stripR=$("stripR");
+let busy=false, fast=false;
+
+function buildPreviews(){
+  const L=[], R=[];
+  ITEMS.slice(0,4).forEach(it=>L.push(prevHTML(it)));
+  ITEMS.slice(-4).reverse().forEach(it=>R.push(prevHTML(it)));
+  stripL.innerHTML=L.join("");
+  stripR.innerHTML=R.join("");
+}
+const prevHTML=i=>`<div class="preview r-${i.rarity}"><div class="em">${art(i)}</div><div class="nm">${i.name}</div><div class="bar"></div></div>`;
+
+function pick(){
+  const sum=ITEMS.reduce((s,i)=>s+i.weight,0);
+  let r=Math.random()*sum;
+  for(const i of ITEMS){ if((r-=i.weight)<0) return i; }
+  return ITEMS[0];
+}
+function rndExcluding(win){
+  let it, n=0;
+  do{ it=ITEMS[Math.floor(Math.random()*ITEMS.length)]; n++; }
+  while(it===win && n<10);
+  return it;
+}
+const cardHTML=i=>`<div class="card r-${i.rarity}"><div class="em">${art(i)}</div><div class="nm">${i.name}</div><div class="bar"></div></div>`;
+
+function confetti(colors){
+  const pal = colors && colors.length ? colors : ["#f7c14b","#c084fc","#8b5cf6","#fff"];
+  for(let n=0;n<80;n++){
+    const c=document.createElement("div");
+    c.className="conf";
+    c.style.left=Math.random()*100+"vw";
+    c.style.background=pal[n%pal.length];
+    c.style.setProperty("--dx",(Math.random()*240-120)+"px");
+    c.style.setProperty("--rot",(Math.random()*900-450)+"deg");
+    c.style.animationDuration=(2+Math.random()*1.8)+"s";
+    c.style.animationDelay=(Math.random()*.3)+"s";
+    c.addEventListener("animationend",()=>c.remove());
+    document.body.appendChild(c);
+  }
+}
+
+/* === СЛЕЖЕНИЕ ЗА КАРТОЧКОЙ ПОД СТРЕЛКОЙ === */
+let pointerRAF = null;
+function trackPointer(){
+  const wrapRect = reelWrap.getBoundingClientRect();
+  const centerX = wrapRect.left + wrapRect.width/2;
+  const cards = strip.children;
+  let closest = null, minDist = Infinity;
+  for(const c of cards){
+    const r = c.getBoundingClientRect();
+    const cx = r.left + r.width/2;
+    const d = Math.abs(cx - centerX);
+    if(d < minDist){ minDist = d; closest = c; }
+  }
+  for(const c of cards) c.classList.remove("under-pointer");
+  if(closest && minDist < 90) closest.classList.add("under-pointer");
+  pointerRAF = requestAnimationFrame(trackPointer);
+}
+function stopTrackPointer(){
+  if(pointerRAF){ cancelAnimationFrame(pointerRAF); pointerRAF = null; }
+  for(const c of strip.children) c.classList.remove("under-pointer");
+}
+
+/* === ОТКРЫТИЕ КЕЙСА === */
+function openCase(){
+  if(busy) return;
+  busy=true;
+  openBtn.disabled=true;
+  const spinTime = fast ? 280 : 900;
+  caseBtn.classList.add("spin");
+  setTimeout(()=>{
+    caseBtn.classList.remove("spin");
+    caseBtn.classList.add("hide");
+    stripL.classList.add("hide");
+    stripR.classList.add("hide");
+    actions.classList.add("hide");
+  }, spinTime);
+  setTimeout(()=>{ startReel(); }, spinTime + 280);
+}
+
+/* === РУЛЕТКА === */
+function startReel(){
+  const win=pick();
+  const list=Array.from({length:REEL_LEN},(_,k)=> k===WIN_INDEX ? win : rndExcluding(win));
+  strip.innerHTML=list.map(cardHTML).join("");
+  strip.style.transition="none";
+  strip.style.transform="translate3d(0,0,0)";
+  reelWrap.classList.add("on", "spinning");
+  trackPointer();
+  requestAnimationFrame(()=>{
+    requestAnimationFrame(()=>{
+      const w=reelWrap.clientWidth;
+      const step=CARD_W+CARD_GAP;
+      const jitter=(Math.random()-.5)*70;
+      const target=-(WIN_INDEX*step + CARD_W/2 - w/2 + jitter);
+      const dur=(fast?1.8:6);
+      void strip.offsetWidth;
+      strip.style.transition=`transform ${dur}s cubic-bezier(.15,.65,.08,1)`;
+      strip.style.transform=`translate3d(${target}px,0,0)`;
+      let done=false;
+      const finish=()=>{
+        if(done) return; done=true;
+        strip.removeEventListener("transitionend", onEnd);
+        stopTrackPointer();
+        reelWrap.classList.remove("spinning");
+        const winCard = strip.children[WIN_INDEX];
+        if(winCard) winCard.classList.add("winner-card");
+        showResult(win);
+      };
+      const onEnd=e=>{ if(e.target===strip && e.propertyName==="transform") finish(); };
+      strip.addEventListener("transitionend", onEnd);
+      setTimeout(finish, dur*1000+150);
+    });
+  });
+}
+
+function showResult(win){
+  const card=$("resultCard");
+  card.className="result-card res-"+win.rarity;
+  $("rEm").innerHTML=art(win);
+  $("rName").textContent=win.name;
+  $("rRar").textContent=win.label;
+  result.classList.add("on");
+  const palByRar={
+    consumer:["#b0c3d9","#fff"], industrial:["#5e98d9","#fff"],
+    milspec:["#4b69ff","#c7d2ff"], restricted:["#8847ff","#c084fc"],
+    classified:["#d32ce6","#ff8cff"], covert:["#eb4b4b","#ffb1b1"],
+    gold:["#f7c14b","#ffe9a8"]
+  };
+  if(win.rarity==="covert"||win.rarity==="gold"||win.rarity==="classified") confetti(palByRar[win.rarity]);
+}
+
+function reset(){
+  result.classList.remove("on");
+  reelWrap.classList.remove("on","spinning");
+  strip.innerHTML="";
+  strip.style.transition="none";
+  strip.style.transform="translate3d(0,0,0)";
+  setTimeout(()=>{
+    caseBtn.classList.remove("hide");
+    stripL.classList.remove("hide");
+    stripR.classList.remove("hide");
+    actions.classList.remove("hide");
+    openBtn.disabled=false;
+    busy=false;
+  }, 260);
+}
+
+$("fastBtn").addEventListener("click",e=>{
+  fast=!fast;
+  e.currentTarget.classList.toggle("on",fast);
+  e.currentTarget.setAttribute("aria-pressed",fast);
+});
+openBtn.addEventListener("click",openCase);
+caseBtn.addEventListener("click",openCase);
+caseBtn.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){e.preventDefault();openCase();} });
+$("again").addEventListener("click",()=>{ reset(); setTimeout(openCase,320); });
+$("close").addEventListener("click",reset);
+result.addEventListener("click",e=>{ if(e.target===result) reset(); });
+
+initParticles();
+buildPreviews();
+</script>
+</body>
+</html>
